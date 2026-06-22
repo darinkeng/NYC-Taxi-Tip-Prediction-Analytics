@@ -1,27 +1,30 @@
-# NYC Taxi Tip Prediction Pipeline
+# NYC Taxi Analytics & Tip Prediction Pipeline
 
 ## Project Overview
 
-This project builds an end-to-end data analytics and machine learning pipeline to predict taxi tip amounts using NYC Yellow Taxi trip records. The workflow combines local SQL exploration, cloud-based querying, feature engineering, and regression modeling to transform raw trip-level data into predictions.
+This project builds an end-to-end analytics and machine learning pipeline using NYC Yellow Taxi trip records. The project combines cloud SQL benchmarking, data engineering workflows, feature engineering, and predictive modeling to analyze taxi trip behavior and predict credit-card tip amounts.
 
-The goal of this project is to demonstrate how large transportation datasets can be cleaned, queried, modeled, and interpreted using a modern data science workflow.
+The goal is to demonstrate how large-scale transportation data can be queried, optimized, transformed, and modeled using tools commonly used in data analyst, data scientist, and data engineering workflows.
+
+The project has two main components:
+
+1. **Cloud SQL Benchmarking**: compares analytical SQL workloads across Databricks and BigQuery.
+2. **Tip Prediction Modeling**: builds a machine learning model to predict taxi tip amounts using trip, fare, time, and location features.
 
 ## Business Problem
 
-Taxi tipping behavior is influenced by factors such as trip distance, fare amount, pickup and dropoff locations, payment type, time of day, and passenger behavior. Understanding these patterns can help transportation platforms, fleet operators, and analysts better understand customer payment behavior and identify the main drivers of tip amounts.
+NYC taxi trip records contain rich information about fare behavior, trip patterns, passenger behavior, payment methods, and tipping. Analyzing this data can help transportation platforms, fleet operators, and analysts better understand what factors influence customer tipping behavior.
 
-In this project, I focus on predicting the tip amount for credit-card taxi trips using trip, fare, time, and location-based features.
+This project explores two practical questions:
 
-## Key Questions
+* How can large taxi trip datasets be queried efficiently across different cloud data platforms?
+* Can trip-level features be used to predict taxi tip amounts for credit-card transactions?
 
-* Which trip characteristics are most associated with higher taxi tips?
-* Can fare, distance, time, and location variables be used to predict tip amount?
-* How can raw taxi trip records be transformed into model-ready features using SQL and Python?
-* What does a scalable workflow look like when moving from local data exploration to cloud-based querying?
+By combining SQL benchmarking with machine learning, this project shows both the infrastructure side and the modeling side of a real-world analytics workflow.
 
 ## Dataset
 
-The project uses NYC Yellow Taxi trip records in Parquet format. The dataset includes trip-level information such as:
+This project uses NYC Yellow Taxi trip records in Parquet format. The dataset includes trip-level variables such as:
 
 * Pickup and dropoff timestamps
 * Pickup and dropoff location IDs
@@ -31,72 +34,98 @@ The project uses NYC Yellow Taxi trip records in Parquet format. The dataset inc
 * Total amount
 * Payment type
 * Passenger count
-* Rate code and vendor information
+* Vendor ID
+* Rate code
 
-Only credit-card trips were used for tip prediction, since cash tips are generally not recorded in the dataset.
+For the tip prediction task, the modeling dataset focuses on credit-card trips because cash tips are generally not fully recorded in the dataset.
 
 ## Tools and Technologies
 
-* **Python**: data processing, feature engineering, modeling
-* **SQL**: data extraction and transformation
-* **DuckDB**: local SQL exploration on Parquet files
-* **BigQuery**: cloud-based querying and scalable feature extraction
-* **Google Cloud Storage**: cloud data storage
+* **SQL**: data extraction, filtering, joins, CTEs, window functions, and performance testing
+* **Databricks**: distributed SQL processing and performance benchmarking
+* **BigQuery**: cloud data warehouse querying and table comparison
+* **DuckDB**: local exploration of Parquet files
+* **Python**: data processing, feature engineering, and modeling
 * **Pandas / NumPy**: data manipulation
 * **CatBoost**: gradient boosting regression model
-* **Scikit-learn**: model evaluation and train-test split
-* **Matplotlib / Seaborn**: exploratory visualization
+* **Scikit-learn**: train-test split and model evaluation
+* **Matplotlib / Seaborn**: exploratory visualization and result communication
 
 ## Project Workflow
 
 ```text
 Raw NYC Yellow Taxi Parquet Data
         ↓
-Local data validation with DuckDB
+Local schema inspection with DuckDB
         ↓
-Upload data to Google Cloud Storage
+Cloud table setup in Databricks and BigQuery
         ↓
-Create external table in BigQuery
+SQL workload benchmarking
         ↓
-Query and filter credit-card taxi trips
+Data filtering and feature extraction
         ↓
-Feature engineering in SQL and Python
+Python feature engineering
         ↓
-Train CatBoost regression model
+CatBoost regression model
         ↓
-Evaluate model using MAE and RMSE
-        ↓
-Interpret feature importance
+Model evaluation and interpretation
 ```
 
-## Methodology
+## Part 1: Cloud SQL Benchmarking
 
-### 1. Local Data Exploration
+The first part of the project evaluates analytical SQL workloads across Databricks and BigQuery. The goal is to understand how different query patterns and storage choices affect performance when working with large taxi trip datasets.
 
-I first used DuckDB to inspect the raw Parquet files locally. This helped validate the schema, check column types, and understand the basic structure of the taxi trip records before moving the data into a cloud environment.
+The benchmarking experiments include:
 
-Example checks included:
+* Data size scaling
+* Join strategy comparison
+* Broadcast join optimization
+* Data skew and repartitioning
+* Sorting and filtering
+* Common table expressions
+* Self-joins
+* Window functions
+* Internal vs external table performance in BigQuery
 
-* Counting total records
-* Inspecting missing values
-* Reviewing fare and tip distributions
-* Filtering invalid or unusual trip records
+### Example SQL Workloads
 
-### 2. Cloud-Based Querying
+The SQL benchmarking section includes queries such as:
 
-After local inspection, the data was uploaded to Google Cloud Storage and queried using BigQuery. This step simulated a more scalable analytics workflow where large datasets are stored and queried in the cloud.
+* Joining taxi trips with lookup tables
+* Detecting outlier fares and trip distances
+* Comparing trips within the same pickup and dropoff zones
+* Ranking trips using window functions
+* Testing runtime differences between internal and external tables
 
-BigQuery was used to:
+### Key Benchmarking Results
 
-* Filter valid taxi trips
-* Select credit-card transactions
-* Remove unrealistic fare, distance, and tip values
-* Extract time-based features
-* Prepare a modeling table for Python
+| Experiment                 | Key Result                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Data size scaling          | Measured how query runtime changed as row count increased from smaller samples to larger taxi datasets |
+| Join optimization          | Compared standard joins with broadcast join strategies                                                 |
+| Data skew handling         | Improved processing throughput after repartitioning skewed data                                        |
+| BigQuery table comparison  | Compared performance between internal and external BigQuery tables                                     |
+| Cross-platform SQL testing | Evaluated similar analytical queries across Databricks and BigQuery                                    |
 
-### 3. Feature Engineering
+These experiments demonstrate practical SQL optimization skills and the ability to reason about cloud data platform tradeoffs.
 
-I created model-ready features from raw trip records, including:
+## Part 2: Tip Prediction Modeling
+
+The second part of the project builds a machine learning model to predict taxi tip amounts for credit-card transactions.
+
+The modeling workflow includes:
+
+1. Filtering valid taxi trips
+2. Removing unrealistic or invalid records
+3. Creating time-based and trip-based features
+4. Handling categorical variables such as pickup and dropoff location IDs
+5. Training a CatBoost regression model
+6. Evaluating model performance using regression metrics
+7. Interpreting the most important predictors of tip amount
+
+## Feature Engineering
+
+The model uses a combination of fare, trip, time, and location-based features, including:
 
 * Trip distance
 * Fare amount
@@ -104,39 +133,90 @@ I created model-ready features from raw trip records, including:
 * Passenger count
 * Pickup hour
 * Pickup day of week
-* Pickup and dropoff location IDs
+* Pickup location ID
+* Dropoff location ID
 * Vendor ID
 * Rate code
-* Payment type
 
-Categorical variables such as location IDs and vendor information were handled using CatBoost, which can directly process categorical features.
+Categorical variables were handled using CatBoost, which is well-suited for tabular datasets with high-cardinality categorical features.
 
-### 4. Predictive Modeling
+## Model
 
-I trained a CatBoost regression model to predict taxi tip amount. CatBoost was selected because it performs well on tabular datasets and can handle categorical variables efficiently without requiring extensive one-hot encoding.
+A CatBoost regression model was trained to predict taxi tip amounts.
+
+CatBoost was selected because:
+
+* It performs well on structured tabular data
+* It can handle categorical variables directly
+* It reduces the need for extensive one-hot encoding
+* It is effective for nonlinear relationships between trip features and tip amounts
+
+## Model Evaluation
 
 The model was evaluated using:
 
 * **Mean Absolute Error (MAE)**
 * **Root Mean Squared Error (RMSE)**
 
-These metrics provide an interpretable view of how close the predicted tip amounts are to the actual recorded tips.
-
-## Results
-
-Key findings:
-
-* Fare amount and total trip cost were strong predictors of tip amount.
-* Trip distance and time-based features added useful predictive signal.
-* Pickup and dropoff location IDs helped capture geographic tipping patterns.
-* CatBoost was effective for handling high-cardinality categorical features such as taxi zone IDs.
-
-Model performance:
-
 | Metric |                Value |
 | ------ | -------------------: |
 | MAE    |              `$1.18` |
 | RMSE   |              `$2.33` |
+
+The MAE result means that, on average, the model’s predicted tip amount was about `$1.18` away from the actual recorded tip amount.
+
+## Key Findings
+
+The analysis and modeling workflow showed that:
+
+* Repartitioning skewed taxi trip data improved Databricks processing throughput from 1.18M to 4.62M rows/sec, showing the importance of partition strategy in distributed SQL workloads.
+* Fare amount and total trip cost were strong predictors of tip amount.
+* Trip distance provided additional predictive signal.
+* Pickup and dropoff locations helped capture geographic tipping patterns.
+* Time-based features such as pickup hour and day of week added useful context.
+* Cloud SQL performance can vary meaningfully depending on table format, join strategy, query structure, and data partitioning.
+
+## Repository Structure
+
+```text
+nyc-taxi-analytics-tip-prediction/
+├── README.md
+├── taxi_tip_prediction.ipynb
+├── sql/
+│   ├── databricks/
+│   │   ├── 00_setup_tables.sql
+│   │   ├── 01_size_scaling.sql
+│   │   ├── 02_broadcast_join.sql
+│   │   ├── 03_data_skew_repartitioning.sql
+│   │   ├── ctes_joins.sql
+│   │   ├── outlier_detection.sql
+│   │   ├── self_join.sql
+│   │   └── window_functions.sql
+│   └── bigquery/
+│       ├── ctes_joins.sql
+│       ├── outlier_detection.sql
+│       ├── self_join.sql
+│       └── window_functions.sql
+
+
+```
+
+## Skills Demonstrated
+
+This project demonstrates:
+
+* SQL querying and performance benchmarking
+* Cloud data warehouse analysis with BigQuery
+* Distributed query processing with Databricks
+* Local Parquet exploration with DuckDB
+* Data cleaning and feature engineering
+* Regression modeling with CatBoost
+* Working with high-cardinality categorical variables
+* Translating raw transportation data into analytical and predictive insights
+
+## Project Summary
+
+This project combines cloud SQL benchmarking and machine learning modeling into one end-to-end NYC taxi analytics pipeline. It demonstrates practical experience with SQL, cloud data platforms, Python modeling, feature engineering, and data science communication.
 
 
 
