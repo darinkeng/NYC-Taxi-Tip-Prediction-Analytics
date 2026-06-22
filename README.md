@@ -24,7 +24,7 @@ By combining SQL benchmarking with machine learning, this project shows both the
 
 ## Dataset
 
-This project uses NYC Yellow Taxi trip records in Parquet format. The dataset includes trip-level variables such as:
+This project uses [NYC Yellow Taxi Trip Records](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) in Parquet format. The dataset includes trip-level variables such as:
 
 * Pickup and dropoff timestamps
 * Pickup and dropoff location IDs
